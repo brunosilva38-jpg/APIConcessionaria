@@ -1,0 +1,25 @@
+info:
+  name: Adicionar Carro
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:5240/api/carros
+  body:
+    type: json
+    data: |-
+      {
+        "marca" : "Chevrolet",
+        "nome" : "Cruze",
+        "ano" : 2017,
+        "valor" : 79000
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

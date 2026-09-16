@@ -1,0 +1,23 @@
+info:
+  name: Atualizar carro
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: http://localhost:5240/api/carros/2
+  body:
+    type: json
+    data: |-
+      {
+        "valor" : 21000,
+        "nome" : "Creta"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
