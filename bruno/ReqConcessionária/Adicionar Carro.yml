@@ -10,10 +10,10 @@ http:
     type: json
     data: |-
       {
-        "marca" : "Chevrolet",
-        "nome" : "Cruze",
-        "ano" : 2017,
-        "valor" : 79000
+        "marca" : "Porche",
+        "nome" : "Porche 911",
+        "ano" : 2021,
+        "valor" : 1300000
       }
   auth: inherit
 

@@ -1,0 +1,38 @@
+## Build e pastas compiladas do .NET
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+## Banco de dados SQLite local e arquivos temporários
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+api-concessionaria-aula09.db
+
+## Arquivos de configuração de usuário e IDEs
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+
+## Logs e arquivos temporários de sistema
+*.log
+[Tt]emp/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+## Pacotes NuGet locais baixados
+*.nupkg
+*.snupkg
+packages/

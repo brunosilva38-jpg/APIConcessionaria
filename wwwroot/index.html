@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoConce - Concessionária de Veículos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Banner Informativo de Integração da API -->
+  <aside class="api-banner" role="region" aria-label="Status de Integração da API">
+    <div class="api-badge">API Integrada</div>
+    <p>Conectado aos endpoints da API ASP.NET Core: <code>/api/carros</code></p>
+  </aside>
+
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="brand">
+        <h1>AutoConce <span>Veículos</span></h1>
+        <p class="tagline">Gestão de Estoque e Veículos</p>
+      </div>
+      <div class="header-status">
+        <span class="status-indicator" aria-hidden="true"></span>
+        <span id="status-api-texto">API Conectada</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Área de Notificações / Feedback Acessível -->
+    <div id="mensagem-alerta" class="alert-box alert-hidden" role="status" aria-live="polite"></div>
+
+    <div class="grid-layout">
+      <!-- Seção do Formulário (Adicionar / Editar) -->
+      <section class="card form-section" aria-labelledby="form-titulo">
+        <div class="card-header">
+          <h2 id="form-titulo">Cadastrar Novo Veículo</h2>
+          <span id="form-subtitulo" class="card-subtitle">Preencha os dados para registrar o veículo na API</span>
+        </div>
+
+        <form id="veiculo-form" novalidate>
+          <input type="hidden" id="veiculo-id" name="id" value="">
+
+          <div class="form-group">
+            <label for="veiculo-marca">Marca do Veículo <span class="required" aria-hidden="true">*</span></label>
+            <input 
+              type="text" 
+              id="veiculo-marca" 
+              name="marca" 
+              placeholder="Ex: Volkswagen, Toyota, Fiat" 
+              required
+              autocomplete="off"
+            >
+            <small class="field-hint">Fabricante da montadora.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="veiculo-nome">Modelo (Nome) <span class="required" aria-hidden="true">*</span></label>
+            <input 
+              type="text" 
+              id="veiculo-nome" 
+              name="nome" 
+              placeholder="Ex: Virtus, Corolla, HB20" 
+              required
+              autocomplete="off"
+            >
+            <small class="field-hint">Nome comercial do modelo.</small>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="veiculo-ano">Ano <span class="required" aria-hidden="true">*</span></label>
+              <input 
+                type="number" 
+                id="veiculo-ano" 
+                name="ano" 
+                placeholder="2022" 
+                min="1900" 
+                max="2099" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="veiculo-valor">Preço (R$) <span class="required" aria-hidden="true">*</span></label>
+              <input 
+                type="number" 
+                id="veiculo-valor" 
+                name="valor" 
+                placeholder="75000.00" 
+                min="0.01" 
+                step="0.01" 
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btn-salvar" class="btn btn-primary">Salvar Veículo</button>
+            <button type="button" id="btn-cancelar" class="btn btn-secondary visually-hidden">Cancelar Edição</button>
+            <button type="reset" id="btn-limpar" class="btn btn-outline">Limpar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Seção da Listagem de Veículos -->
+      <section class="card list-section" aria-labelledby="lista-titulo">
+        <div class="card-header table-header-flex">
+          <div>
+            <h2 id="lista-titulo">Veículos em Estoque</h2>
+            <span class="card-subtitle">Registros sincronizados diretamente com a API</span>
+          </div>
+          <div class="counter-badge" id="contador-veiculos" aria-label="Total de veículos listados">
+            0 veículos
+          </div>
+        </div>
+
+        <!-- Indicador de Carregamento da API -->
+        <div id="tabela-loading" class="loading-state visually-hidden" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Carregando veículos da API...</p>
+        </div>
+
+        <div class="table-responsive" id="tabela-container">
+          <table class="data-table" aria-label="Tabela de veículos cadastrados na API">
+            <thead>
+              <tr>
+                <th scope="col" style="width: 60px;">ID</th>
+                <th scope="col">Marca</th>
+                <th scope="col">Modelo</th>
+                <th scope="col" style="width: 80px;">Ano</th>
+                <th scope="col">Preço (R$)</th>
+                <th scope="col" class="text-center" style="width: 220px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-veiculos-corpo">
+              <!-- Linhas geradas dinamicamente com textContent via app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mensagem de Lista Vazia -->
+        <div id="tabela-vazia" class="empty-state visually-hidden">
+          <p>Nenhum veículo cadastrado na concessionária.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal de Visualização de Detalhes -->
+  <div id="modal-detalhes" class="modal-backdrop visually-hidden" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Ficha do Veículo</h3>
+        <button type="button" id="btn-fechar-modal" class="btn-close" aria-label="Fechar janela de detalhes"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body" id="modal-corpo-detalhes">
+        <!-- Detalhes preenchidos de forma segura com textContent via app.js -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btn-modal-fechar-rodape" class="btn btn-secondary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="container footer-content">
+      <p>Interface Integrada à API ASP.NET Core &bull; AutoConce Concessionária</p>
+      <small>Construído com HTML, CSS e JavaScript puros.</small>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

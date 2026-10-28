@@ -1,23 +1,25 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ApiDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddCors();
 var app = builder.Build();
+app.UseCors(policy => policy.AllowAnyOrigin()
+    .AllowAnyHeader().AllowAnyMethod());
 
-var carros = new List<Carro>
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapGet("/api/carros", async (ApiDbContext db) =>
 {
-    new Carro(1, "Volkswagen", "Virtus", 2019, 67000m),
-    new Carro(2, "Hyundai", "HB20", 2021, 58000m)
-
-};
-
-app.MapGet("/", () => "API está no ar");
-
-app.MapGet("/api/carros", () =>
-{
-    return Results.Ok(carros);
+    var Veiculos = await db.Veiculos.ToListAsync();
+    return Results.Ok(Veiculos); 
 });
 
-app.MapGet("/api/carros/{id:int}",(int id) =>
+app.MapGet("/api/carros/{id:int}", async (int id, ApiDbContext db) =>
 {
-    var carroEncontrado = carros.Find(carro => carro.id == id);
+    var carroEncontrado = db.Veiculos.Find(id);
     if (carroEncontrado is null)
     {
         return Results.NotFound();
@@ -25,48 +27,59 @@ app.MapGet("/api/carros/{id:int}",(int id) =>
     return Results.Ok(carroEncontrado);
 } );
 
-app.MapPost("/api/carros" , (CriarCarroDTO dados) =>
+app.MapPost("/api/carros" , async (VeiculoEntity dados, ApiDbContext db) =>
 {
-    int proximoId = carros.Count +1;
-    var novoCarro = new Carro(proximoId, dados.marca , dados.nome, dados.ano, dados.valor);
-    carros.Add(novoCarro);
-    return Results.Created($"/api/carros/{novoCarro.id}", novoCarro);
+    db.Veiculos.Add(dados);
+    await db.SaveChangesAsync();
+     return Results.Created($"/api/carros/{dados.id}", dados);
+
 });
 
-app.MapPut("/api/carros/{id:int}", (int id , AtualizarCarroDTO dados) =>
+
+app.MapPut("/api/carros/{id:int}", async (int id , VeiculoEntity carroAtualizado , ApiDbContext db) =>
 {
-    int indice = carros.FindIndex(Carro => Carro.id == id);
-    if (indice == -1)
-    {
-        return Results.NotFound();
-    }
+    var carro = await db.Veiculos.FindAsync(id);
+    if (carro is null) return Results.NotFound();
+    carro.marca = carroAtualizado.marca;
+    carro.nome = carroAtualizado.nome;
+    carro.ano = carroAtualizado.ano;
+    carro.valor = carroAtualizado.valor;
 
-    var carroAntigo = carros[indice];
-
-    var carroAtualizado = new Carro(
-        id,
-        dados.marca ?? carroAntigo.marca,
-        dados.nome ?? carroAntigo.nome,
-        dados.ano.HasValue && dados.ano > 0 ? dados.ano.Value : carroAntigo.ano,
-        dados.valor.HasValue && dados.valor > 0 ? dados.valor.Value : carroAntigo.valor);
-    
-    carros[indice] = carroAtualizado;
-    return Results.Ok(carroAtualizado);
+    await db.SaveChangesAsync();
+    return Results.Ok(carro);
+   
 });
 
-app.MapDelete("/api/carros/{id:int}", (int id) =>
+app.MapDelete("/api/carros/{id:int}", async (int id, ApiDbContext db) =>
 {
-    int indice = carros.FindIndex(Carro => Carro.id == id);
-    if (indice == -1)
-    {
-        return Results.NotFound();
-    }
-    carros.RemoveAt(indice);
+    var carro = await db.Veiculos.FindAsync(id);
+    if (carro is null) return Results.NotFound();
+
+    db.Veiculos.Remove(carro);
+    await db.SaveChangesAsync();
     return Results.NoContent();
+    
 });
 
 
 app.Run();
+
+class VeiculoEntity
+{
+    public int id { get; set; }
+    public string marca { get; set; } = string.Empty;
+    public string nome { get; set; } = string.Empty;
+    public int ano { get; set; }
+    public decimal valor { get; set; }
+}
+
+class ApiDbContext : DbContext
+{
+    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
+    {
+    }
+    public DbSet<VeiculoEntity> Veiculos => Set<VeiculoEntity>();
+}
 
 record Carro (int id, string marca, string nome, int ano, decimal valor);
 
