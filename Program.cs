@@ -8,6 +8,19 @@ var app = builder.Build();
 app.UseCors(policy => policy.AllowAnyOrigin()
     .AllowAnyHeader().AllowAnyMethod());
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            mensagem = "Ocorreu um erro interno. Tente novamente mais tarde."
+        });
+    });
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -60,6 +73,7 @@ app.MapDelete("/api/carros/{id:int}", async (int id, ApiDbContext db) =>
     return Results.NoContent();
     
 });
+
 
 
 app.Run();
