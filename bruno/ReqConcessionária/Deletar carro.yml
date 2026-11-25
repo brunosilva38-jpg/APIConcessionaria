@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: http://localhost:5240/api/carros/5
+  url: http://localhost:5240/api/carros/14
   body:
     type: json
     data: ""

@@ -1,4 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using ApiConcessionária.Models;
+using ApiConcessionária.Data;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApiDbContext>(options =>
@@ -78,25 +82,7 @@ app.MapDelete("/api/carros/{id:int}", async (int id, ApiDbContext db) =>
 
 app.Run();
 
-class VeiculoEntity
-{
-    public int id { get; set; }
-    public string marca { get; set; } = string.Empty;
-    public string nome { get; set; } = string.Empty;
-    public int ano { get; set; }
-    public decimal valor { get; set; }
-}
 
-class ApiDbContext : DbContext
-{
-    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)
-    {
-    }
-    public DbSet<VeiculoEntity> Veiculos => Set<VeiculoEntity>();
-}
 
-record Carro (int id, string marca, string nome, int ano, decimal valor);
 
-record CriarCarroDTO (string marca, string nome, int ano, decimal valor);
 
-record AtualizarCarroDTO (string? marca, string? nome, int? ano, decimal? valor);

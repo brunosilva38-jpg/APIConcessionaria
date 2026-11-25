@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:5240/api/carros/2
+  url: http://localhost:5240/api/carros/88
   auth: inherit
 
 settings:
